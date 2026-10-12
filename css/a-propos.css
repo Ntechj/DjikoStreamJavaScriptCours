@@ -1,0 +1,12 @@
+.about-hero{padding:66px 0 44px;text-align:center}
+.about-hero p{color:var(--text-soft)}
+.about-grid{display:grid;grid-template-columns:1.3fr .9fr;gap:28px;padding-bottom:72px}
+.about-card{
+  padding:28px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-medium);
+  background:rgba(18,22,35,.78)
+}
+.about-card p,.about-card li{color:var(--text-soft)}
+.about-card li+li{margin-top:8px}
+@media(max-width:800px){.about-grid{grid-template-columns:1fr}}
