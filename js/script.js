@@ -62,12 +62,42 @@ for(let i = 0; i < resultat.results.length; i++){
 
 }
 
+const carteTendance = document.querySelector("#trending-grid");
+const estAccueil = Boolean(indexTendance);
+
+estAccueil && chargerTendance();
+
+
+async function chargerTendance() {
+  const urlIndexTendance = "https://api.themoviedb.org/3/trending/all/day?api_key=" + API_KEY;
+  try {
+    const response = await fetch(urlIndexTendance);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(result);
+
+    let Compteurtendance = 0;
+
+    for(let i = 0; i < result.results.length; i++) {
+      if (compteurTendance < carteTendance.length)
+    }
+
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
 function changeText(card, value) {
 
   const titre = card.querySelector("h3")
   titre.textContent = value;
   console.log(card, value)
-}        
+}
+
+
     
 
     
