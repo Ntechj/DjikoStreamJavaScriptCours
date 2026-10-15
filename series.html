@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/catalogue.css">
+    <link rel="stylesheet" href="css/cartes-dynamiques.css">
 </head>
 <body>
     <header class="site-header">
@@ -157,6 +158,20 @@
     </footer>
 
     <!-- Garde tes fichiers JavaScript actuels dans le dossier js/ -->
+    <!-- Modèle HTML réutilisable pour les cartes (invisible tant que JS ne le clone pas). -->
+    <template id="modele-carte-media">
+        <article class="media-card">
+            <div class="poster-container">
+                <img class="media-poster" alt="">
+            </div>
+            <div class="media-card-content">
+                <h3></h3>
+                <p class="media-meta"></p>
+                <span class="media-badge"></span>
+            </div>
+        </article>
+    </template>
+
     <script src="js/config.js"></script>
     <script src="js/variables.js"></script>
     <script src="js/script.js"></script>

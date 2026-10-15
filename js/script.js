@@ -17,6 +17,19 @@ async function rechercherContenu(recherche) {
   }
 
 const resultat = await reponse.json();
+
+const movies = document.querySelectorAll("#movies-grid .media-card");
+const series = document.querySelectorAll("#series-grid .media-card");
+
+movies.forEach(carte => carte.style.display = "none");
+series.forEach(carte => carte.style.display = "none");
+
+const grilleTendances = document.querySelector("#trending-grid");
+
+  if (grilleTendances) {
+    grilleTendances.closest("section").style.display = "none";
+}
+
  console.log(resultat);
 
 console.log(movies.length)
@@ -28,6 +41,9 @@ let seriesIndex = 0;
 for(let i = 0; i < resultat.results.length; i++){ 
 
         if (resultat.results[i].media_type === "movie" && moviesIndex < movies.length) {
+
+          movies[moviesIndex].style.display = "";
+
         const titleMovie = movies[moviesIndex].querySelector("h3");
         const moviesImg = movies[moviesIndex].querySelector(".media-poster");
 
@@ -41,6 +57,9 @@ for(let i = 0; i < resultat.results.length; i++){
       }  
         
         else if (resultat.results[i].media_type === "tv" && seriesIndex < series.length) {
+
+        series[seriesIndex].style.display = "";    
+
         const titleTv = series[seriesIndex].querySelector("h3");
         const seriesImg = series[seriesIndex].querySelector(".media-poster");
 
@@ -258,10 +277,100 @@ async function chargerFilmsAccueil() {
 chargerFilmsAccueil()
 
 
+async function chargerSeriesAccueil() {
+  const url = "https://api.themoviedb.org/3/trending/tv/week?api_key=" + API_KEY + "&language=fr-FR";
+  try {
+    const reponse = await fetch(url);
+    if (!reponse.ok) {
+      throw new Error(`Statut de réponse : ${reponse.status}`);
+    }
+
+    const urlTendanceSeries = "https://api.themoviedb.org/3/genre/tv/list?api_key=" + API_KEY + "&language=fr-FR";
+
+    const resultatSeriesAccueil = await reponse.json();
+    console.log(resultatSeriesAccueil);
+
+    const responseTendanceGenresSeries = await fetch(urlTendanceSeries);
+
+    if (!responseTendanceGenresSeries.ok) {
+      throw new Error(`Statut de réponse : ${responseTendanceGenresSeries.status}`);
+    }
+
+    const resultatGenresSeries = await responseTendanceGenresSeries.json(); 
+
+      const conteneurSeries = document.querySelector("#series-grid");
+
+        conteneurSeries.replaceChildren();
+
 //=========================================================================================================
-//    
+//    Récupérer les titres des tendances Series 
+//=========================================================================================================          
+  
+  for (let i = 0 ; i < resultatSeriesAccueil.results.length ; i++) {  
+  
+    const carteSeries = document.createElement("article");
+
+    carteSeries.className = "media-card";
+
+    const titreTendanceSeries = document.createElement("h3");
+
+    titreTendanceSeries.textContent = resultatSeriesAccueil.results[i].name;
+
+    carteSeries.appendChild(titreTendanceSeries);
+
+    conteneurSeries.appendChild(carteSeries);
+
+//=========================================================================================================
+//    Récupérer les images des cartes Tendances Series
+//=========================================================================================================    
+
+    const imageSeries = document.createElement("img");
+
+    imageSeries.src = "https://image.tmdb.org/t/p/w500" + resultatSeriesAccueil.results[i].poster_path
+
+    imageSeries.alt = "Affiche de la Series " + resultatSeriesAccueil.results[i].name;
+
+    imageSeries.className = "media-poster";
+
+    carteSeries.appendChild(imageSeries);
+
+    conteneurSeries.appendChild(carteSeries);
+
+//=========================================================================================================
+//    Récupérer les Genres des Series
 //=========================================================================================================
 
+    const idsGenres = resultatSeriesAccueil.results[i].genre_ids;
+
+    let nameGenre = [];
+
+    for (let j = 0 ; j < idsGenres.length ; j++) {
+
+      for (let ng = 0 ; ng < resultatGenresSeries.genres.length ; ng++) {
+
+        if (idsGenres[j] === resultatGenresSeries.genres[ng].id) {
+
+          nameGenre.push(resultatGenresSeries.genres[ng].name);
+        }
+    
+      }
+    
+    }
+      const genreSeries = document.createElement("p");
+
+      genreSeries.className = "media-meta";
+
+      genreSeries.textContent = nameGenre;
+
+      carteSeries.appendChild(genreSeries);
+  }    
+    
+  } catch (erreur) {
+    console.error(erreur.message);
+  }
+}
+
+chargerSeriesAccueil()
  
   
          
