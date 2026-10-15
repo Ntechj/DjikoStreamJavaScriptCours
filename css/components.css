@@ -99,6 +99,17 @@
   box-shadow:var(--shadow-card);
   transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease
 }
+
+#movies-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+#movies-grid .media-card {
+    flex: 0 0 220px;
+}
+
 .media-card:hover{
   transform:translateY(-5px);
   border-color:rgba(183,135,255,.72);
