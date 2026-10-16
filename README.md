@@ -1,3 +1,5 @@
+[Voir la maquette DigiCoStream sur Figma](https://www.figma.com/design/fvlqz5p2QWJNZWZxQx8Mff/DjiKoStream?node-id=1-3)
+
 # DjikoStream — version propre et formatée
 
 Cette version reprend le front-end précédent mais avec :
