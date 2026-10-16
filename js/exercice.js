@@ -209,19 +209,115 @@ console.log(series);
 
 
 
+//==================================================
+//  DIGICOSTREAM - FILTRE DES FILMS PAR GENRE
+//==================================================
 
+const filtreGenre = document.querySelector("#filtre-genre");
+const conteneurFilmsFiltre = document.querySelector("#movies-grid");
+const modeleCarteFilm = document.querySelector("#modele-carte-media");
 
+if (filtreGenre && conteneurFilmsFiltre && modeleCarteFilm) {
 
-  }      
+    filtreGenre.addEventListener("change", async function () {
 
+        const idGenre = filtreGenre.value;
 
-  } catch (erreur) {
-    console.error(erreur.message);
-  }
+        if (idGenre === "all") {
+          chargerFilmsAccueil();
+          return;
+        }
+
+        const urlFilms = "https://api.themoviedb.org/3/discover/movie?api_key="
+            + API_KEY
+            + "&language=fr-FR&sort_by=popularity.desc&with_genres="
+            + idGenre;
+
+        const urlGenres = "https://api.themoviedb.org/3/genre/movie/list?api_key="
+            + API_KEY
+            + "&language=fr-FR";
+
+        try {
+
+            // Récupérer les films
+            const reponseFilms = await fetch(urlFilms);
+
+            if (!reponseFilms.ok) {
+                throw new Error("Erreur lors de la récupération des films");
+            }
+
+            const resultatFilms = await reponseFilms.json();
+
+            // Récupérer les genres
+            const reponseGenres = await fetch(urlGenres);
+
+            if (!reponseGenres.ok) {
+                throw new Error("Erreur lors de la récupération des genres");
+            }
+
+            const resultatGenres = await reponseGenres.json();
+
+            // Supprimer les anciennes cartes
+            conteneurFilmsFiltre.replaceChildren();
+
+            // Parcourir les films récupérés
+            for (let i = 0; i < resultatFilms.results.length; i++) {
+
+                const film = resultatFilms.results[i];
+
+                // Ignorer les films sans affiche
+                if (!film.poster_path) {
+                    continue;
+                }
+
+                // Copier notre modèle HTML
+                const carte = modeleCarteFilm.content.firstElementChild.cloneNode(true);
+
+                // Remplir le titre
+                const titre = carte.querySelector("h3");
+                titre.textContent = film.title;
+
+                // Remplir l'affiche
+                const image = carte.querySelector(".media-poster");
+
+                image.src = "https://image.tmdb.org/t/p/w500"
+                    + film.poster_path;
+
+                image.alt = "Affiche du film " + film.title;
+
+                // Récupérer les noms des genres
+                const nomsGenres = [];
+
+                for (let j = 0; j < film.genre_ids.length; j++) {
+
+                    for (let ng = 0; ng < resultatGenres.genres.length; ng++) {
+
+                        if (film.genre_ids[j] === resultatGenres.genres[ng].id) {
+
+                            nomsGenres.push(resultatGenres.genres[ng].name);
+
+                        }
+                    }
+                }
+
+                // Afficher les genres
+                const genreFilm = carte.querySelector(".media-meta");
+                genreFilm.textContent = nomsGenres.join(", ");
+
+                // Remplir le badge
+                const badge = carte.querySelector(".media-badge");
+                badge.textContent = "Film";
+
+                // Ajouter la carte dans la grille
+                conteneurFilmsFiltre.appendChild(carte);
+            }
+
+        } catch (erreur) {
+            console.error(erreur.message);
+        }
+
+    });
 }
-
-chargerSeriesAccueil()
-
 
 
 

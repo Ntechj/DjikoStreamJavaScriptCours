@@ -371,6 +371,233 @@ async function chargerSeriesAccueil() {
 }
 
 chargerSeriesAccueil()
+
+
+
+/* =============================================
+   DIGICOSTREAM - FILTRES FILMS / SERIES / TENDANCES
+============================================= */
+
+const filtreGenre = document.querySelector("#filtre-genre");
+const modeleCarte = document.querySelector("#modele-carte-media");
+const pageActuelle = window.location.pathname.split("/").pop();
+
+// Fonction commune pour récupérer les données TMDB
+async function recupererTMDB(chemin) {
+    const url = "https://api.themoviedb.org/3/" + chemin
+        + (chemin.includes("?") ? "&" : "?")
+        + "api_key=" + API_KEY + "&language=fr-FR";
+
+    const reponse = await fetch(url);
+
+    if (!reponse.ok) {
+        throw new Error("Erreur TMDB : " + reponse.status);
+    }
+
+    return await reponse.json();
+}
+
+// Fonction commune pour afficher les cartes
+function afficherCartesFiltrees(grille, resultats, genresFilms, genresSeries) {
+
+    grille.replaceChildren();
+
+    let nombreCartes = 0;
+
+    for (const contenu of resultats) {
+
+        if (!contenu.poster_path) {
+            continue;
+        }
+
+        const carte = modeleCarte.content.firstElementChild.cloneNode(true);
+        const estSerie = contenu.media_type === "tv";
+
+        const titre = estSerie ? contenu.name : contenu.title;
+
+        carte.querySelector("h3").textContent = titre;
+
+        const image = carte.querySelector(".media-poster");
+        image.src = "https://image.tmdb.org/t/p/w500" + contenu.poster_path;
+        image.alt = "Affiche de " + titre;
+
+        const catalogue = estSerie ? genresSeries : genresFilms;
+
+        const nomsGenres = catalogue.filter(function (genre) {
+            return contenu.genre_ids.includes(genre.id);
+        }).map(function (genre) {
+            return genre.name;
+        });
+
+        carte.querySelector(".media-meta").textContent = nomsGenres.join(", ");
+        carte.querySelector(".media-badge").textContent = estSerie ? "Série" : "Film";
+
+        grille.appendChild(carte);
+        nombreCartes++;
+    }
+
+    if (nombreCartes === 0) {
+        const message = document.createElement("p");
+        message.textContent = "Aucun résultat trouvé pour ce genre.";
+        grille.appendChild(message);
+    }
+}
+
+// Adapter le menu aux genres des séries
+if (filtreGenre && pageActuelle === "series.html") {
+
+    const genresTV = [
+        ["all", "Tous les genres"],
+        ["10759", "Action et aventure"],
+        ["16", "Animation"],
+        ["35", "Comédie"],
+        ["80", "Crime"],
+        ["99", "Documentaire"],
+        ["18", "Drame"],
+        ["10751", "Famille"],
+        ["9648", "Mystère"],
+        ["10765", "Science-fiction et fantastique"],
+        ["10768", "Guerre et politique"],
+        ["37", "Western"]
+    ];
+
+    filtreGenre.replaceChildren();
+
+    for (const genre of genresTV) {
+        filtreGenre.add(new Option(genre[1], genre[0]));
+    }
+}
+
+// Événement du filtre
+if (filtreGenre && modeleCarte) {
+
+    if (pageActuelle === "tendances.html") {
+        filtreGenre.value = "all";
+    }
+
+    filtreGenre.addEventListener("change", async function () {
+
+        const idGenre = filtreGenre.value;
+
+        // Revenir aux tendances initiales
+        if (idGenre === "all") {
+
+            if (pageActuelle === "films.html") {
+                chargerFilmsAccueil();
+            } else if (pageActuelle === "series.html") {
+                chargerSeriesAccueil();
+            } else if (pageActuelle === "tendances.html") {
+                window.location.reload();
+            }
+
+            return;
+        }
+
+        try {
+
+            // PAGE FILMS
+            if (pageActuelle === "films.html") {
+
+                const films = await recupererTMDB(
+                    "discover/movie?with_genres=" + idGenre
+                    + "&sort_by=popularity.desc"
+                );
+
+                const genres = await recupererTMDB("genre/movie/list");
+
+                afficherCartesFiltrees(
+                    document.querySelector("#movies-grid"),
+                    films.results,
+                    genres.genres,
+                    []
+                );
+            }
+
+            // PAGE SERIES
+            else if (pageActuelle === "series.html") {
+
+                const series = await recupererTMDB(
+                    "discover/tv?with_genres=" + idGenre
+                    + "&sort_by=popularity.desc"
+                );
+
+                const genres = await recupererTMDB("genre/tv/list");
+
+                const resultats = series.results.map(function (serie) {
+                    return { ...serie, media_type: "tv" };
+                });
+
+                afficherCartesFiltrees(
+                    document.querySelector("#series-grid"),
+                    resultats,
+                    [],
+                    genres.genres
+                );
+            }
+
+            // PAGE TENDANCES
+            else if (pageActuelle === "tendances.html") {
+
+                const tendances = await recupererTMDB("trending/all/day");
+                const genresFilms = await recupererTMDB("genre/movie/list");
+                const genresSeries = await recupererTMDB("genre/tv/list");
+
+                // Correspondances entre genres Films et Séries
+                const correspondancesTV = {
+                    "28": [10759],
+                    "12": [10759],
+                    "35": [35],
+                    "18": [18],
+                    "14": [10765],
+                    "27": [],
+                    "878": [10765],
+                    "53": []
+                };
+
+                const resultats = tendances.results.filter(function (contenu) {
+
+                    const ids = contenu.genre_ids || [];
+
+                    if (contenu.media_type === "movie") {
+                        return ids.includes(Number(idGenre));
+                    }
+
+                    if (contenu.media_type === "tv") {
+                        return (correspondancesTV[idGenre] || []).some(
+                            function (idTV) {
+                                return ids.includes(idTV);
+                            }
+                        );
+                    }
+
+                    return false;
+                });
+
+                const grille = document.querySelector("#trending-grid");
+
+                // Masquer les autres sections pendant le filtrage
+                const sectionFilms = document.querySelector("#movies-grid")?.closest("section");
+                const sectionSeries = document.querySelector("#series-grid")?.closest("section");
+
+                if (sectionFilms) sectionFilms.style.display = "none";
+                if (sectionSeries) sectionSeries.style.display = "none";
+
+                afficherCartesFiltrees(
+                    grille,
+                    resultats,
+                    genresFilms.genres,
+                    genresSeries.genres
+                );
+            }
+
+        } catch (erreur) {
+            console.error("Erreur de filtrage :", erreur.message);
+        }
+
+    });
+}
+
+
  
   
          

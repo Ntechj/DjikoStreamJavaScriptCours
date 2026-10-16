@@ -105,7 +105,24 @@
     flex-wrap: nowrap;
     overflow-x: auto;
 }
+/* ======================================
+   PAGE FILMS - AFFICHAGE EN GRILLE
+====================================== */
 
+.page-films #movies-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    overflow-x: visible;
+}
+
+.page-films #movies-grid .media-card {
+    min-width: 0;
+    width: auto;
+}
+/*========================================
+
+==========================================*/
 #movies-grid .media-card {
     flex: 0 0 220px;
 }
@@ -197,3 +214,133 @@
   .section-header{align-items:start;flex-direction:column}
   .footer-inner{min-height:145px;flex-direction:column;justify-content:center;text-align:center}
 }
+
+@media (max-width: 900px) {
+    .page-films #movies-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 550px) {
+    .page-films #movies-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+/* ==========================================
+   DIGICOSTREAM - BOUTON FILTRES
+========================================== */
+
+.filters-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0;
+}
+
+.filter-dropdown {
+    position: relative;
+    z-index: 20;
+}
+
+/* Petit bouton */
+
+.filter-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 11px 17px;
+
+    background: #242039;
+    color: #eee7ff;
+
+    border: 1px solid #765ba9;
+    border-radius: 10px;
+
+    cursor: pointer;
+    font-size: 14px;
+
+    transition: all 0.2s ease;
+
+    list-style: none;
+}
+
+/* Masquer la flèche native */
+
+.filter-button::-webkit-details-marker {
+    display: none;
+}
+
+/* Survol */
+
+.filter-button:hover,
+.filter-dropdown[open] .filter-button {
+    background: #30264b;
+    border-color: #a578eb;
+    box-shadow: 0 0 12px rgba(148, 91, 222, 0.3);
+}
+
+.filter-button:focus-visible {
+    outline: 2px solid #bd92ff;
+    outline-offset: 3px;
+}
+
+/* Panneau déroulant */
+
+.filter-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+
+    width: 250px;
+    padding: 20px;
+    box-sizing: border-box;
+
+    background: #201c30;
+    border: 1px solid #765ba9;
+    border-radius: 12px;
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Texte */
+
+.filter-panel label {
+    display: block;
+    margin-bottom: 12px;
+
+    color: #eee7ff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Menu des genres */
+
+.filter-panel select {
+    width: 100%;
+    padding: 11px 12px;
+
+    background: #141420;
+    color: #ffffff;
+
+    border: 1px solid #665384;
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.filter-panel select:focus {
+    outline: 2px solid #a578eb;
+    outline-offset: 2px;
+}
+
+/* Mobile */
+
+@media (max-width: 550px) {
+    .filter-panel {
+        width: min(250px, 85vw);
+    }
+}
+
